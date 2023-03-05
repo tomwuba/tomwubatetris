@@ -20,6 +20,8 @@ public class Block {
 	
 	ArrayList<Segment> segments;
 	
+	boolean isRotating = false;
+	
 	// constructor
 	public Block(Tetris tetris, int middleX, int middleY) {
 		this.tetris = tetris;
@@ -44,7 +46,7 @@ public class Block {
 	}
 	
 	public void rotate(int direction) {
-		
+		//System.out.println(System.currentTimeMillis() + "test");
 		ArrayList<Segment> newSegments = new ArrayList<>();
 		if(blockType != BlockType.BLOCK_7 && blockType != BlockType.BLOCK_1) {
 			for(Segment oldSegment : segments) {
@@ -102,7 +104,6 @@ public class Block {
 				
 			// TODO: Check if one of the segments is on an already existing segment! (NOT from the same block tho.)
 			segments = newSegments;
-				
 			return;
 		} else if(blockType != BlockType.BLOCK_1){
 			// 4*1 Block

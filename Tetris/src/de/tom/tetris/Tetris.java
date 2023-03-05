@@ -40,6 +40,8 @@ public class Tetris extends Thread{
 	
 	KeyHandler keyHandler;
 	
+
+	
 	
 	
 	
@@ -68,7 +70,7 @@ public class Tetris extends Thread{
 		WindowPane windowPane = new WindowPane(this);
 		windowPane.setPreferredSize(new Dimension(500, 600));
 		
-		keyHandler = new KeyHandler();
+		keyHandler = new KeyHandler(this);
 		jframe.addKeyListener(keyHandler);
 		jframe.getContentPane().add(windowPane);
 		jframe.pack();
@@ -84,7 +86,7 @@ public class Tetris extends Thread{
 	@Override
 	public void run() {
 		
-		long timeInFuture = 0L;		
+		long timeInFuture = 0L;	
 		while(!isInterrupted()) {
 			
 			
@@ -92,6 +94,8 @@ public class Tetris extends Thread{
 				timeInFuture = System.currentTimeMillis() + getGameSpeed();
 				updateInSpeed();
 			}
+			
+			
 			getFrame().getContentPane().repaint();
 		}
 	}
@@ -100,6 +104,8 @@ public class Tetris extends Thread{
 	void updateInSpeed() {
 		updateCurrentBlock();
 	}
+	
+	
 	
 	void updateCurrentBlock() {
 		
