@@ -151,6 +151,14 @@ public class KeyHandler implements KeyListener{
 						
 					}
 					break;
+				case 40:
+					while(downKeyDown) {
+						
+						tetris.updateCurrentBlock();
+						sleep(100);
+						
+					}
+					break;
 				}
 				
 				

@@ -3,6 +3,7 @@ package de.tom.tetris.objects;
 import java.awt.Color;
 import java.awt.Graphics;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 
 
@@ -50,7 +51,7 @@ public class Block {
 		ArrayList<Segment> newSegments = new ArrayList<>();
 		if(blockType != BlockType.BLOCK_7 && blockType != BlockType.BLOCK_1) {
 			for(Segment oldSegment : segments) {
-				Segment newSegment = oldSegment;
+				Segment newSegment = new Segment(tetris, oldSegment.getX(), oldSegment.getY(), oldSegment.segmentType);
 					
 				// Left part of block:
 				if(newSegment.getX() < middleX) {
@@ -101,14 +102,15 @@ public class Block {
 					
 			}
 			//segments.clear();
-				
-			// TODO: Check if one of the segments is on an already existing segment! (NOT from the same block tho.)
-			segments = newSegments;
+			
+			// Checks if one of the segments is on an already existing segment! (NOT from the same block tho.)
+			if(!isBlockOverlapping(newSegments) && !isOutSideOfMap(newSegments)) segments = newSegments;
+
 			return;
 		} else if(blockType != BlockType.BLOCK_1){
 			// 4*1 Block
 			for(Segment oldSegment : segments) {
-				Segment newSegment = oldSegment;
+				Segment newSegment = new Segment(tetris, oldSegment.getX(), oldSegment.getY(), oldSegment.segmentType);
 				if(newSegment.getX() < middleX) {
 					newSegment.setX(middleX);
 					newSegment.setY(middleY-1);						
@@ -133,7 +135,7 @@ public class Block {
 					
 				newSegments.add(newSegment);
 			}
-			segments = newSegments;
+			if(!isBlockOverlapping(newSegments) && !isOutSideOfMap(newSegments)) segments = newSegments;
 		}
 		
 	}
@@ -151,14 +153,21 @@ public class Block {
 	
 	
 	public void setLocation(int middleX, int middleY) {
+		List<Segment> newSegments = new ArrayList<Segment>();
 		for(Segment segment : segments) {
-			
-			segment.setX(segment.getX()+(middleX-this.middleX));
-			segment.setY(segment.getY()+(middleY-this.middleY));
-
+			Segment segment2 = new Segment(tetris, segment.getX(), segment.getY(), segment.segmentType);
+			segment2.setX(segment.getX()+(middleX-this.middleX));
+			segment2.setY(segment.getY()+(middleY-this.middleY));
+			newSegments.add(segment2);
 		}
-		this.middleX = middleX;
-		this.middleY = middleY;
+		if(!isOutSideOfMap(newSegments)) {
+			
+			this.middleX = middleX;
+			this.middleY = middleY;
+			segments = (ArrayList<Segment>) newSegments;
+			return;
+		}
+		
 	}
 	
 	public boolean willBlockTouchOtherBlock(int middleX, int middleY) {
@@ -198,6 +207,20 @@ public class Block {
 			segment.move(directionX);
 			// TODO: check!
 		}
+	}
+	
+	private boolean isBlockOverlapping(List<Segment> segmentList) {
+		for(Segment segment : segmentList) {
+			if(tetris.isOtherSegmentOnChords(this, segment.getX(), segment.getY())) return true;
+		}
+		return false;
+	}
+	
+	public boolean isOutSideOfMap(List<Segment> segmentList) {
+		for(Segment segment : segmentList) {
+			if(segment.getX() < 0 || segment.getX() > 14 || segment.getY() > 29) return true;
+		}
+		return false;
 	}
 	
 	

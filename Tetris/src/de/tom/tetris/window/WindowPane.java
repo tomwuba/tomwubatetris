@@ -40,7 +40,7 @@ public class WindowPane extends JPanel{
 			block.draw(g);
 		}
 		tetris.getCurrentBlock().draw(g);
-		
+		tetris.getNextBlock().draw(g);
 		
 	}
 	

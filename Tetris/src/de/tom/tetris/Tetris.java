@@ -64,7 +64,7 @@ public class Tetris extends Thread{
 		backgroundImage = Toolkit.getDefaultToolkit().getImage(getPathToData() + "/data/background.png");
 		jframe = new JFrame("Tetris");
 		jframe.setIconImage(new ImageIcon(pathToData + "/data/tetris.png").getImage());
-		nextBlock = new Block(this, 7, 1);
+		nextBlock = new Block(this, 19, 5);
 		currentBlock = new Block(this, 7, 1);
 		
 		WindowPane windowPane = new WindowPane(this);
@@ -107,7 +107,7 @@ public class Tetris extends Thread{
 	
 	
 	
-	void updateCurrentBlock() {
+	public void updateCurrentBlock() {
 		
 			
 		if(currentBlock.isTouchingFloor() || currentBlock.willBlockTouchOtherBlock(currentBlock.getX(), currentBlock.getY()+1)) {
@@ -132,8 +132,9 @@ public class Tetris extends Thread{
 	}
 	
 	public void createNextBlock() {
+		nextBlock.setLocation(7, 1);
 		currentBlock = nextBlock;
-		nextBlock = new Block(this, 7, 1);
+		nextBlock = new Block(this, 19, 5);
 	}
 	// main-method
 	public static void main(String[] args) {
@@ -169,7 +170,7 @@ public class Tetris extends Thread{
 	
 	public boolean isOtherSegmentOnChords(Block checkedFor, int x, int y) {
 		for(Block block : blocks) {
-			if(block != checkedFor && block.hasSegmentOnPosition(x, y)) return true;
+			if(!block.equals(checkedFor) && block.hasSegmentOnPosition(x, y)) return true;
 		}
 		return false;
 	}
