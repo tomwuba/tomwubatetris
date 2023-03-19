@@ -35,6 +35,8 @@ public class Tetris extends Thread{
 	
 	boolean died, paused;
 	
+	KeyHandler keyHandler;
+	
 	
 
 	
@@ -67,8 +69,8 @@ public class Tetris extends Thread{
 		
 		WindowPane windowPane = new WindowPane(this);
 		windowPane.setPreferredSize(new Dimension(500, 600));
-		
-		jframe.addKeyListener(new KeyHandler(this));
+		keyHandler = new KeyHandler(this);
+		jframe.addKeyListener(keyHandler);
 		jframe.getContentPane().add(windowPane);
 		jframe.pack();
 		jframe.setLocationRelativeTo(null);
@@ -125,7 +127,7 @@ public class Tetris extends Thread{
 			
 			return;
 		}
-		currentBlock.setLocation(currentBlock.getX(), currentBlock.getY()+1);
+		if(!keyHandler.dKeyDown) currentBlock.setLocation(currentBlock.getX(), currentBlock.getY()+1);
 	}
 	
 	public void moveCurrentBlock(int direction) {
