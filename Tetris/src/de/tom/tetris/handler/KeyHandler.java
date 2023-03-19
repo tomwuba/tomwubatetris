@@ -155,7 +155,7 @@ public class KeyHandler implements KeyListener{
 					while(downKeyDown) {
 						
 						tetris.updateCurrentBlock();
-						sleep(100);
+						sleep(Math.round(tetris.getGameSpeed()/10.0f));
 						
 					}
 					break;

@@ -3,9 +3,6 @@ package de.tom.tetris;
 import java.awt.Dimension;
 import java.awt.Image;
 import java.awt.Toolkit;
-import java.awt.event.KeyListener;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
 import java.io.File;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
@@ -34,11 +31,10 @@ public class Tetris extends Thread{
 	Image backgroundImage;
 	ArrayList<Block> blocks = new ArrayList<>();
 	
-	Block nextBlock;
+	Block nextBlock, currentBlock;
 	
-	Block currentBlock;
+	boolean died, paused;
 	
-	KeyHandler keyHandler;
 	
 
 	
@@ -48,6 +44,8 @@ public class Tetris extends Thread{
 	// constructor
 	public Tetris() {
 		setupJFrame();
+		died = false;
+		paused = false;
 		this.start();
 		
 	}
@@ -70,8 +68,7 @@ public class Tetris extends Thread{
 		WindowPane windowPane = new WindowPane(this);
 		windowPane.setPreferredSize(new Dimension(500, 600));
 		
-		keyHandler = new KeyHandler(this);
-		jframe.addKeyListener(keyHandler);
+		jframe.addKeyListener(new KeyHandler(this));
 		jframe.getContentPane().add(windowPane);
 		jframe.pack();
 		jframe.setLocationRelativeTo(null);
@@ -88,21 +85,31 @@ public class Tetris extends Thread{
 		
 		long timeInFuture = 0L;	
 		while(!isInterrupted()) {
-			
+			getFrame().getContentPane().repaint();
 			
 			if(timeInFuture <= System.currentTimeMillis()) {
 				timeInFuture = System.currentTimeMillis() + getGameSpeed();
-				updateInSpeed();
+				updateGameInSpeed();
 			}
 			
 			
-			getFrame().getContentPane().repaint();
+
 		}
 	}
 	
 	
-	void updateInSpeed() {
+	void updateGameInSpeed() {
 		updateCurrentBlock();
+		boolean gotLinesRemoved = false;
+		for(int i = 0; i < 30; i++) {
+			if(isLineFull(i)) {
+				eraseLine(i);
+				moveOtherLines(i);
+				gotLinesRemoved = true;
+			}
+		}
+		// TODO: Play sound
+		if(gotLinesRemoved);
 	}
 	
 	
@@ -112,8 +119,10 @@ public class Tetris extends Thread{
 			
 		if(currentBlock.isTouchingFloor() || currentBlock.willBlockTouchOtherBlock(currentBlock.getX(), currentBlock.getY()+1)) {
 			// Block is on the floor!
+			
 			addBlock(currentBlock);
 			createNextBlock();
+			
 			return;
 		}
 		currentBlock.setLocation(currentBlock.getX(), currentBlock.getY()+1);
@@ -136,6 +145,30 @@ public class Tetris extends Thread{
 		currentBlock = nextBlock;
 		nextBlock = new Block(this, 19, 5);
 	}
+	
+	public void eraseLine(int lineNumber) {
+		for(Block block : blocks) {
+			if(!block.equals(getCurrentBlock())) {
+				for(Segment segment : block.getSegments()) {
+					if(segment.getY() == lineNumber) segment.remove();
+				}
+			}
+			
+			
+		}
+		
+		
+	}
+	
+	public void moveOtherLines(int lineNumber) {
+		for(Block block : blocks) {
+			if(!block.equals(getCurrentBlock())) {
+				block.fall(lineNumber);
+			}
+
+		}
+	}
+	
 	// main-method
 	public static void main(String[] args) {
 		new Tetris();
@@ -170,7 +203,7 @@ public class Tetris extends Thread{
 	
 	public boolean isOtherSegmentOnChords(Block checkedFor, int x, int y) {
 		for(Block block : blocks) {
-			if(!block.equals(checkedFor) && block.hasSegmentOnPosition(x, y)) return true;
+			if(!block.equals(checkedFor) && block.hasSegmentOnPosition(x, y) && block.getSegmentOnChords(x, y).isExisting()) return true;
 		}
 		return false;
 	}
@@ -185,6 +218,30 @@ public class Tetris extends Thread{
 	
 	public Block getCurrentBlock() {
 		return currentBlock;
+	}
+	
+	
+	
+	
+	public boolean isLineFull(int lineNumber) {
+		int numbSegmentsInLine = 0;
+		for(int i = 0; i < 15; i++) {
+			
+			if(isOtherSegmentOnChords(getCurrentBlock(), i, lineNumber)) numbSegmentsInLine++;
+			
+			
+		}
+		if(numbSegmentsInLine > 14) return true;
+		return false;
+	}
+	
+	
+	boolean isDead() {
+		return died;
+	}
+	
+	boolean isPaused() {
+		return paused;
 	}
 	
 	

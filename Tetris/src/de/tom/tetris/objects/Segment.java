@@ -75,6 +75,11 @@ public class Segment {
 		return false;
 	}
 	
+	public boolean isOutSideMap() {
+		if(getX() < 0 || getX() > 14 || getY() > 29) return true;
+		return false;
+	}
+	
 	
 	
 	

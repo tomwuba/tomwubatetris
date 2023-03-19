@@ -4,6 +4,7 @@ import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Toolkit;
 import java.util.ArrayList;
+import java.util.Iterator;
 
 import javax.swing.JPanel;
 
@@ -35,10 +36,17 @@ public class WindowPane extends JPanel{
 	protected void paintComponent(Graphics g) {
 		super.paintComponent(g);
 		fillBackground(g);
-		
-		for(Block block : tetris.getBlocks()) {
-			block.draw(g);
+		Iterator<Block> it = tetris.getBlocks().iterator();
+		while(it.hasNext()) {
+			Block block = it.next();
+			if(!block.isExisting()) {
+				it.remove();
+			} else {
+				block.draw(g);
+			}
+
 		}
+		
 		tetris.getCurrentBlock().draw(g);
 		tetris.getNextBlock().draw(g);
 		
