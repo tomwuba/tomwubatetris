@@ -140,6 +140,7 @@ public class Tetris extends Thread{
 	
 	public void addBlock(Block block) {
 		blocks.add(block);
+		// adds a block
 	}
 	
 	public void createNextBlock() {
