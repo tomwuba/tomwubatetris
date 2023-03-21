@@ -13,6 +13,8 @@ public class Segment {
 	int x, y, segmentType;
 	boolean existing = false;
 	
+	
+	
 	// constructor
 	public Segment(Tetris tetris, int x, int y, int segmentType) {
 		this.tetris = tetris;
@@ -32,8 +34,8 @@ public class Segment {
 		if(width > tetris.getFrame().getContentPane().getWidth()) width = tetris.getFrame().getContentPane().getWidth();
 		int height = (int) ((float) 600*((float)tetris.getFrame().getContentPane().getWidth()/(float)500));
 		if(height > tetris.getFrame().getContentPane().getHeight()) height = tetris.getFrame().getContentPane().getHeight();
-
-		g.fillRect((x*Math.round(tetris.getScale()))+tetris.getFrame().getContentPane().getWidth()/2-(width/2), (y*Math.round(tetris.getScale()))+tetris.getFrame().getContentPane().getHeight()/2-(height/2), Math.round(tetris.getScale()), Math.round(tetris.getScale()));
+		g.drawImage(tetris.getSegmentImages()[segmentType], Math.round((x*tetris.getScale())+tetris.getFrame().getContentPane().getWidth()/2-(width/2)), Math.round(y*tetris.getScale()+tetris.getFrame().getContentPane().getHeight()/2-(height/2)), Math.round(tetris.getScale()), Math.round(tetris.getScale()), null);
+		//g.fillRect((x*Math.round(tetris.getScale()))+tetris.getFrame().getContentPane().getWidth()/2-(width/2), (y*Math.round(tetris.getScale()))+tetris.getFrame().getContentPane().getHeight()/2-(height/2), Math.round(tetris.getScale()), Math.round(tetris.getScale()));
 	}
 	
 	
@@ -71,7 +73,7 @@ public class Segment {
 	}
 	
 	public boolean isTouchingFloor() {
-		if(getY()*Math.round(tetris.getScale())+Math.round(tetris.getScale()) >= tetris.getFrame().getContentPane().getHeight()) return true;
+		if(getY() >= 29) return true;
 		return false;
 	}
 	

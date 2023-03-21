@@ -37,6 +37,12 @@ public class Tetris extends Thread{
 	
 	KeyHandler keyHandler;
 	
+	Image segmentImages[] = new Image[7];
+	
+	String segmentPack = "_classic_colour";
+	
+	
+	
 	
 
 	
@@ -61,11 +67,16 @@ public class Tetris extends Thread{
 		} catch (UnsupportedEncodingException e) {
 			e.printStackTrace();
 		}
-		backgroundImage = Toolkit.getDefaultToolkit().getImage(getPathToData() + "/data/background.png");
+		backgroundImage = Toolkit.getDefaultToolkit().getImage(getPathToData() + "/texture/background.png");
 		jframe = new JFrame("Tetris");
-		jframe.setIconImage(new ImageIcon(pathToData + "/data/tetris.png").getImage());
+		jframe.setIconImage(new ImageIcon(pathToData + "/texture/tetris.png").getImage());
 		nextBlock = new Block(this, 19, 5);
 		currentBlock = new Block(this, 7, 1);
+		// Set Images:
+		for(int i = 0; i < 7; i++) {
+			segmentImages[i] = Toolkit.getDefaultToolkit().getImage(getPathToData() + "/texture/segments" + segmentPack + "/segment_" + i + ".png");
+		}
+		
 		
 		WindowPane windowPane = new WindowPane(this);
 		windowPane.setPreferredSize(new Dimension(500, 600));
@@ -87,11 +98,13 @@ public class Tetris extends Thread{
 		
 		long timeInFuture = 0L;	
 		while(!isInterrupted()) {
+
 			getFrame().getContentPane().repaint();
+
 			
 			if(timeInFuture <= System.currentTimeMillis()) {
 				timeInFuture = System.currentTimeMillis() + getGameSpeed();
-				updateGameInSpeed();
+				if(!isDead() && !isPaused()) updateGameInSpeed();
 			}
 			
 			
@@ -144,6 +157,11 @@ public class Tetris extends Thread{
 	}
 	
 	public void createNextBlock() {
+		if(currentBlock.getY() < 3) {
+			died = true;
+			paused = true;
+			return;
+		}
 		nextBlock.setLocation(7, 1);
 		currentBlock = nextBlock;
 		nextBlock = new Block(this, 19, 5);
@@ -239,12 +257,16 @@ public class Tetris extends Thread{
 	}
 	
 	
-	boolean isDead() {
+	public boolean isDead() {
 		return died;
 	}
 	
-	boolean isPaused() {
+	public boolean isPaused() {
 		return paused;
+	}
+	
+	public Image[] getSegmentImages() {
+		return segmentImages;
 	}
 	
 	
