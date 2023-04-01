@@ -1,5 +1,6 @@
 package de.tom.tetris;
 
+import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Image;
 import java.awt.Toolkit;
@@ -8,9 +9,16 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import javax.swing.ImageIcon;
 import javax.swing.JFrame;
+import javax.swing.JMenu;
+import javax.swing.JMenuBar;
+import javax.swing.JMenuItem;
+import javax.swing.JSeparator;
+import javax.swing.UIManager;
+import javax.swing.UnsupportedLookAndFeelException;
 
 import de.tom.tetris.handler.KeyHandler;
 import de.tom.tetris.objects.Block;
@@ -29,7 +37,7 @@ public class Tetris extends Thread{
 	
 	String pathToData;
 	Image backgroundImage;
-	ArrayList<Block> blocks = new ArrayList<>();
+	CopyOnWriteArrayList<Block> blocks = new CopyOnWriteArrayList<>();
 	
 	Block nextBlock, currentBlock;
 	
@@ -69,6 +77,7 @@ public class Tetris extends Thread{
 		}
 		backgroundImage = Toolkit.getDefaultToolkit().getImage(getPathToData() + "/texture/background.png");
 		jframe = new JFrame("Tetris");
+		setupJMenuBar();
 		jframe.setIconImage(new ImageIcon(pathToData + "/texture/tetris.png").getImage());
 		nextBlock = new Block(this, 19, 5);
 		currentBlock = new Block(this, 7, 1);
@@ -87,8 +96,49 @@ public class Tetris extends Thread{
 		jframe.setLocationRelativeTo(null);
 		jframe.setLocationByPlatform(true);
 		jframe.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-
+		
 		jframe.setVisible(true);
+	}
+	
+	
+	void setupJMenuBar() {
+		try {
+			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+		} catch (ClassNotFoundException | InstantiationException | IllegalAccessException
+				| UnsupportedLookAndFeelException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+		JMenuBar menubar = new JMenuBar();
+		menubar.setPreferredSize(new Dimension(jframe.getWidth(), 20));
+		
+		JMenu settings = new JMenu("Einstellungen");
+		JMenuItem graphic = new JMenuItem("Grafik...            ");
+		JMenuItem difficulty = new JMenuItem("Schwierigkeit...            ");
+		
+		settings.add(graphic);
+		settings.add(difficulty);
+		
+		JMenu game = new JMenu("Spiel");
+		JMenuItem newGame = new JMenuItem("Neu                          F2");
+	
+		JMenuItem starter = new JMenuItem("Pausieren                F3");
+		
+	
+		game.add(newGame);
+		
+		JSeparator jseperator = new JSeparator(JSeparator.HORIZONTAL);
+		jseperator.setBackground(Color.LIGHT_GRAY);
+		jseperator.setForeground(Color.WHITE);
+		game.add(jseperator);
+		game.add(starter);
+		
+		game.setBackground(Color.BLACK);
+		menubar.add(game);
+		menubar.add(settings);
+		
+		jframe.setJMenuBar(menubar);
 	}
 	
 	
@@ -114,6 +164,7 @@ public class Tetris extends Thread{
 	
 	
 	void updateGameInSpeed() {
+		System.out.println(getCurrentBlock().getSegments().size());
 		updateCurrentBlock();
 		boolean gotLinesRemoved = false;
 		for(int i = 0; i < 30; i++) {
