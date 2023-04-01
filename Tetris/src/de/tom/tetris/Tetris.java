@@ -8,6 +8,7 @@ import java.io.File;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
@@ -218,7 +219,9 @@ public class Tetris extends Thread{
 	}
 	
 	public void eraseLine(int lineNumber) {
-		for(Block block : blocks) {
+		Iterator<Block> it = blocks.iterator();
+		while(it.hasNext()) {
+			Block block = it.next();
 			if(!block.equals(getCurrentBlock())) {
 				for(Segment segment : block.getSegments()) {
 					if(segment.getY() == lineNumber) segment.remove();
@@ -232,7 +235,9 @@ public class Tetris extends Thread{
 	}
 	
 	public void moveOtherLines(int lineNumber) {
-		for(Block block : blocks) {
+		Iterator<Block> it = blocks.iterator();
+		while(it.hasNext()) {
+			Block block = it.next();
 			if(!block.equals(getCurrentBlock())) {
 				block.fall(lineNumber);
 			}
@@ -273,7 +278,9 @@ public class Tetris extends Thread{
 	}
 	
 	public boolean isOtherSegmentOnChords(Block checkedFor, int x, int y) {
-		for(Block block : blocks) {
+		Iterator<Block> it = blocks.iterator();
+		while(it.hasNext()) {
+			Block block = it.next();
 			if(!block.equals(checkedFor) && block.hasSegmentOnPosition(x, y) && block.getSegmentOnChords(x, y).isExisting()) return true;
 		}
 		return false;
