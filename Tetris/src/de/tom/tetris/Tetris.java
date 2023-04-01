@@ -164,7 +164,6 @@ public class Tetris extends Thread{
 	
 	
 	void updateGameInSpeed() {
-		System.out.println(getCurrentBlock().getSegments().size());
 		updateCurrentBlock();
 		boolean gotLinesRemoved = false;
 		for(int i = 0; i < 30; i++) {
