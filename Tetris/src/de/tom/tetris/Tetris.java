@@ -205,6 +205,7 @@ public class Tetris extends Thread{
 	public void addBlock(Block block) {
 		blocks.add(block);
 		// adds a block
+		//yes
 	}
 	
 	public void createNextBlock() {
@@ -213,6 +214,7 @@ public class Tetris extends Thread{
 			paused = true;
 			return;
 		}
+		
 		nextBlock.setLocation(7, 1);
 		currentBlock = nextBlock;
 		nextBlock = new Block(this, 19, 5);
