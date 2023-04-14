@@ -1,17 +1,14 @@
 package de.tom.tetris.objects;
 
-import java.awt.Color;
 import java.awt.Graphics;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
 
-
 import de.tom.tetris.Tetris;
 import de.tom.tetris.constants.BlockRotation;
 import de.tom.tetris.constants.BlockType;
-import de.tom.tetris.constants.SegmentType;
 
 public class Block {
 	
@@ -166,7 +163,7 @@ public class Block {
 	
 	public void setLocation(int middleX, int middleY) {
 		
-		List<Segment> newSegments = new ArrayList<Segment>();
+		ArrayList<Segment> newSegments = new ArrayList<Segment>();
 		for(Segment segment : segments) {
 			Segment segment2 = new Segment(tetris, segment.getX(), segment.getY(), segment.segmentType);
 			segment2.setX(segment.getX()+(middleX-this.middleX));
@@ -177,7 +174,7 @@ public class Block {
 			
 			this.middleX = middleX;
 			this.middleY = middleY;
-			segments = (ArrayList<Segment>) newSegments;
+			segments = newSegments;
 			return;
 		}
 		
