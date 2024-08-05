@@ -3,7 +3,11 @@ package de.tom.tetris;
 import java.applet.AudioClip;
 import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.Font;
+import java.awt.FontFormatException;
+import java.awt.GraphicsEnvironment;
 import java.awt.Image;
+import java.awt.event.ActionEvent;
 import java.io.File;
 import java.io.IOException;
 import java.util.Iterator;
@@ -17,6 +21,7 @@ import javax.sound.sampled.Clip;
 import javax.sound.sampled.DataLine;
 import javax.sound.sampled.LineUnavailableException;
 import javax.sound.sampled.UnsupportedAudioFileException;
+import javax.swing.AbstractAction;
 import javax.swing.JFrame;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
@@ -63,8 +68,18 @@ public class Tetris extends Thread{
 	
 	public Clip tetrisClip;
 	
-	float volume = 25.0f;
+	float volume = 50.0f;
 	
+	public boolean gameOver = true;
+	
+	public boolean gamePaused = true;
+	
+	public Font gameFont;
+	
+	int score = 0;
+	
+	JMenuItem starter = new JMenuItem("error");
+	JMenuItem newGame = new JMenuItem("error");
 	
 	
 	
@@ -79,13 +94,27 @@ public class Tetris extends Thread{
 		fallSoundFile = new File(Tetris.class.getResource("/sound/fall.wav").getPath());
 		lineSoundFile = new File(Tetris.class.getResource("/sound/line.wav").getPath());
 		AudioInputStream sound;
+		try {
+		     GraphicsEnvironment ge = 
+		         GraphicsEnvironment.getLocalGraphicsEnvironment();
+		     ge.registerFont(Font.createFont(Font.TRUETYPE_FONT, new File(Tetris.class.getResource("/fonts/font.ttf").getPath())));
+		} catch (IOException|FontFormatException e) {
+		     //Handle exception
+		}
+		try {
+			gameFont = Font.createFont(Font.TRUETYPE_FONT, new File(Tetris.class.getResource("/fonts/font.ttf").getPath()));
+			gameFont = new Font(gameFont.getName(), gameFont.getStyle(),40);
+		} catch (FontFormatException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 		
 		
 		
 		keyCooldown = new long[GameKeys.MAX_KEYS];
 		setupJFrame();
-		died = false;
-		paused = false;
+		
 		this.start();
 		try {
 			sound = AudioSystem.getAudioInputStream(tetrisSongFile);
@@ -93,8 +122,8 @@ public class Tetris extends Thread{
 			tetrisClip = (Clip) AudioSystem.getLine(info);
 			tetrisClip.open(sound);
 			SoundAPI.setVolume(tetrisClip, 0.25f);
-			tetrisClip.loop(Clip.LOOP_CONTINUOUSLY);
-			tetrisClip.start();
+			
+			
 		} catch (UnsupportedAudioFileException | IOException | LineUnavailableException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -162,14 +191,51 @@ public class Tetris extends Thread{
 		JMenu settings = new JMenu("Einstellungen");
 		JMenuItem graphic = new JMenuItem("Grafik...            ");
 		JMenuItem difficulty = new JMenuItem("Schwierigkeit...            ");
+		JMenuItem volume = new JMenuItem("Lautstärke...            ");
 		
 		settings.add(graphic);
 		settings.add(difficulty);
+		JSeparator jseperator2 = new JSeparator(JSeparator.HORIZONTAL);
+		jseperator2.setBackground(Color.LIGHT_GRAY);
+		jseperator2.setForeground(Color.WHITE);
+		settings.add(jseperator2);
+		settings.add(volume);
 		
 		JMenu game = new JMenu("Spiel");
-		JMenuItem newGame = new JMenuItem("Neu                          F2");
-	
-		JMenuItem starter = new JMenuItem("Pausieren                F3");
+		newGame = new JMenuItem(new AbstractAction("Neu                          F1") {
+			
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				
+			}
+		});
+		
+		starter = new JMenuItem( new AbstractAction("Starten                F2") {
+			
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				if(!gameOver) {
+					if(!gamePaused) {
+						gamePaused = true;
+						starter.setText("Spiel Fortsetzen                F2");
+						tetrisClip.stop();
+					} else {
+						gamePaused = false;
+						starter.setText("Pausieren                ESC");
+						tetrisClip.loop(Clip.LOOP_CONTINUOUSLY);
+						tetrisClip.start();
+					}
+					
+				} else if(gameOver) {
+					gameOver = false;
+					gamePaused = false;
+					tetrisClip.loop(Clip.LOOP_CONTINUOUSLY);
+					tetrisClip.start();
+					starter.setText("Pausieren                ESC");
+				}
+				
+			}
+		});
 		
 	
 		game.add(newGame);
@@ -185,6 +251,21 @@ public class Tetris extends Thread{
 		menubar.add(settings);
 		
 		jframe.setJMenuBar(menubar);
+	}
+	
+	public void resetGame() {
+		
+		
+		died = false;
+		nextBlock = new Block(this, 19, 5);
+		currentBlock = new Block(this, 7, 1);
+		gamePaused = false;
+		gameOver = false;
+		blocks.clear();
+		score = 0;
+		tetrisClip.loop(Clip.LOOP_CONTINUOUSLY);
+		tetrisClip.start();
+		starter.setText("Pausieren                ESC");
 	}
 	
 	
@@ -213,6 +294,10 @@ public class Tetris extends Thread{
 	
 	
 	void updateGameInSpeed() {
+		if(gameOver || gamePaused) {
+			
+			return;
+		}
 		updateCurrentBlock();
 		
 		boolean gotLinesRemoved = false;
@@ -231,6 +316,35 @@ public class Tetris extends Thread{
 	
 	
 	public void handleKeys() {
+		if(gamePaused && newKeyHandler.isKeyDown(112) && !(gameOver && !died)) {
+			resetGame();
+		}
+		
+		if(newKeyHandler.isKeyDown(113)) {
+			if(gamePaused && !gameOver) {
+				gamePaused = false;
+				tetrisClip.loop(Clip.LOOP_CONTINUOUSLY);
+				tetrisClip.start();
+				starter.setText("Pausieren                ESC");
+					
+			} else if(gameOver) {
+				gameOver = false;
+				gamePaused = false;
+				tetrisClip.loop(Clip.LOOP_CONTINUOUSLY);
+				tetrisClip.start();
+				starter.setText("Spiel Fortsetzen                F2");
+			}
+		}
+			
+		if(newKeyHandler.isKeyDown(27)) {
+			if(!gamePaused && !gameOver) {
+				gamePaused = true;
+				tetrisClip.stop();
+			} 
+		}
+		
+		if(gamePaused) return;
+		
 		if(keyCooldown[GameKeys.COOLDOWN_A] > System.currentTimeMillis() && !newKeyHandler.isKeyDown(GameKeys.A_KEY)) keyCooldown[GameKeys.COOLDOWN_A] = 0;
 		if(keyCooldown[GameKeys.COOLDOWN_D] > System.currentTimeMillis() && !newKeyHandler.isKeyDown(GameKeys.D_KEY)) keyCooldown[GameKeys.COOLDOWN_D] = 0;
 
@@ -255,6 +369,7 @@ public class Tetris extends Thread{
 			moveCurrentBlock(1);
 			keyCooldown[GameKeys.COOLDOWN_RIGHT] = System.currentTimeMillis() + 100L;
 		}
+		
 		
 	}
 	
@@ -312,6 +427,7 @@ public class Tetris extends Thread{
 			
 		}
 		new SoundAPI().playSound(lineSoundFile, 25);
+		score++;
 		
 		
 	}
@@ -406,6 +522,10 @@ public class Tetris extends Thread{
 	
 	public Image[] getSegmentImages() {
 		return segmentImages;
+	}
+	
+	public int getScore() {
+		return score;
 	}
 	
 	
