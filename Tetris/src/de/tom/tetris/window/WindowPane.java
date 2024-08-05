@@ -39,11 +39,9 @@ public class WindowPane extends JPanel{
 		Iterator<Block> it = tetris.getBlocks().iterator();
 		while(it.hasNext()) {
 			Block block = it.next();
-			if(!block.isExisting()) {
-				it.remove();
-			} else {
+			if(block.isExisting()) {
 				block.draw(g);
-			}
+			} 
 
 		}
 		

@@ -5,6 +5,7 @@ import java.awt.Dimension;
 import java.awt.Image;
 import java.awt.Toolkit;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.util.ArrayList;
@@ -12,6 +13,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
+import javax.imageio.ImageIO;
 import javax.swing.ImageIcon;
 import javax.swing.JFrame;
 import javax.swing.JMenu;
@@ -21,7 +23,9 @@ import javax.swing.JSeparator;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
 
+import de.tom.tetris.handler.GameKeys;
 import de.tom.tetris.handler.KeyHandler;
+import de.tom.tetris.handler.NewKeyHandler;
 import de.tom.tetris.objects.Block;
 import de.tom.tetris.objects.Segment;
 import de.tom.tetris.window.WindowPane;
@@ -50,6 +54,10 @@ public class Tetris extends Thread{
 	
 	String segmentPack = "_classic_colour";
 	
+	long[] keyCooldown;
+	
+	NewKeyHandler newKeyHandler;
+	
 	
 	
 	
@@ -60,6 +68,7 @@ public class Tetris extends Thread{
 	
 	// constructor
 	public Tetris() {
+		keyCooldown = new long[GameKeys.MAX_KEYS];
 		setupJFrame();
 		died = false;
 		paused = false;
@@ -76,10 +85,11 @@ public class Tetris extends Thread{
 		} catch (UnsupportedEncodingException e) {
 			e.printStackTrace();
 		}
-		backgroundImage = Toolkit.getDefaultToolkit().getImage(getPathToData() + "/texture/background.png");
+		
+		backgroundImage = Toolkit.getDefaultToolkit().getImage(pathToData + "/texture/background.png");
 		jframe = new JFrame("Tetris");
 		setupJMenuBar();
-		jframe.setIconImage(new ImageIcon(pathToData + "/texture/tetris.png").getImage());
+		jframe.setIconImage(new ImageIcon("/texture/tetris.png").getImage());
 		nextBlock = new Block(this, 19, 5);
 		currentBlock = new Block(this, 7, 1);
 		// Set Images:
@@ -90,8 +100,9 @@ public class Tetris extends Thread{
 		
 		WindowPane windowPane = new WindowPane(this);
 		windowPane.setPreferredSize(new Dimension(500, 600));
-		keyHandler = new KeyHandler(this);
-		jframe.addKeyListener(keyHandler);
+		//keyHandler = new KeyHandler(this);
+		newKeyHandler = new NewKeyHandler();
+		jframe.addKeyListener(newKeyHandler);
 		jframe.getContentPane().add(windowPane);
 		jframe.pack();
 		jframe.setLocationRelativeTo(null);
@@ -149,13 +160,16 @@ public class Tetris extends Thread{
 		
 		long timeInFuture = 0L;	
 		while(!isInterrupted()) {
-
+			
 			getFrame().getContentPane().repaint();
 
+			handleKeys();
 			
 			if(timeInFuture <= System.currentTimeMillis()) {
 				timeInFuture = System.currentTimeMillis() + getGameSpeed();
 				if(!isDead() && !isPaused()) updateGameInSpeed();
+			} else {
+				
 			}
 			
 			
@@ -166,6 +180,7 @@ public class Tetris extends Thread{
 	
 	void updateGameInSpeed() {
 		updateCurrentBlock();
+		
 		boolean gotLinesRemoved = false;
 		for(int i = 0; i < 30; i++) {
 			if(isLineFull(i)) {
@@ -175,7 +190,38 @@ public class Tetris extends Thread{
 			}
 		}
 		// TODO: Play sound
+		
 		if(gotLinesRemoved);
+	}
+	
+	
+	
+	public void handleKeys() {
+		if(keyCooldown[GameKeys.COOLDOWN_A] > System.currentTimeMillis() && !newKeyHandler.isKeyDown(GameKeys.A_KEY)) keyCooldown[GameKeys.COOLDOWN_A] = 0;
+		if(keyCooldown[GameKeys.COOLDOWN_D] > System.currentTimeMillis() && !newKeyHandler.isKeyDown(GameKeys.D_KEY)) keyCooldown[GameKeys.COOLDOWN_D] = 0;
+
+		
+		if(newKeyHandler.isKeyDown(GameKeys.A_KEY) && !newKeyHandler.isKeyDown(GameKeys.D_KEY) &&keyCooldown[GameKeys.COOLDOWN_A] <= System.currentTimeMillis()) {
+			getCurrentBlock().rotate(-1);
+			keyCooldown[GameKeys.COOLDOWN_A] = System.currentTimeMillis() + 400L;
+		}
+		if(newKeyHandler.isKeyDown(GameKeys.D_KEY) && !newKeyHandler.isKeyDown(GameKeys.A_KEY) &&keyCooldown[GameKeys.COOLDOWN_D] <= System.currentTimeMillis()) {
+			getCurrentBlock().rotate(1);
+			keyCooldown[GameKeys.COOLDOWN_D] = System.currentTimeMillis() + 400L;
+		}
+		if(newKeyHandler.isKeyDown(GameKeys.S_KEY) &&keyCooldown[GameKeys.COOLDOWN_S] <= System.currentTimeMillis()) {
+			updateCurrentBlock();
+			keyCooldown[GameKeys.COOLDOWN_S] = System.currentTimeMillis() + Math.round(getGameSpeed()/10.0f);
+		}
+		if(newKeyHandler.isKeyDown(GameKeys.LEFT_KEY) && !newKeyHandler.isKeyDown(GameKeys.RIGHT_KEY) &&keyCooldown[GameKeys.COOLDOWN_LEFT] <= System.currentTimeMillis()) {
+			moveCurrentBlock(-1);
+			keyCooldown[GameKeys.COOLDOWN_LEFT] = System.currentTimeMillis() + 100L;
+		}
+		if(newKeyHandler.isKeyDown(GameKeys.RIGHT_KEY) && !newKeyHandler.isKeyDown(GameKeys.LEFT_KEY) &&keyCooldown[GameKeys.COOLDOWN_RIGHT] <= System.currentTimeMillis()) {
+			moveCurrentBlock(1);
+			keyCooldown[GameKeys.COOLDOWN_RIGHT] = System.currentTimeMillis() + 100L;
+		}
+		
 	}
 	
 	
@@ -191,7 +237,7 @@ public class Tetris extends Thread{
 			
 			return;
 		}
-		if(!keyHandler.dKeyDown) currentBlock.setLocation(currentBlock.getX(), currentBlock.getY()+1);
+		if(!newKeyHandler.isKeyDown(GameKeys.D_KEY)) currentBlock.setLocation(currentBlock.getX(), currentBlock.getY()+1);
 	}
 	
 	public void moveCurrentBlock(int direction) {
@@ -223,7 +269,7 @@ public class Tetris extends Thread{
 		Iterator<Block> it = blocks.iterator();
 		while(it.hasNext()) {
 			Block block = it.next();
-			if(!block.equals(getCurrentBlock())) {
+			if(!block.equals(getCurrentBlock()) && block.isExisting()) {
 				for(Segment segment : block.getSegments()) {
 					if(segment.getY() == lineNumber) segment.remove();
 				}
@@ -239,7 +285,7 @@ public class Tetris extends Thread{
 		Iterator<Block> it = blocks.iterator();
 		while(it.hasNext()) {
 			Block block = it.next();
-			if(!block.equals(getCurrentBlock())) {
+			if(!block.equals(getCurrentBlock()) && block.isExisting()) {
 				block.fall(lineNumber);
 			}
 

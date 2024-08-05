@@ -17,7 +17,7 @@ public class Block {
 	int middleX, middleY, blockType, rotation;
 	boolean existing;
 	
-	ArrayList<Segment> segments;
+	ArrayList<Segment> segments; // TODO: Array!!!!!!!!!!!!!!!!!!!!!!-----------------------------------------------
 	
 	boolean isRotating = false;
 	
