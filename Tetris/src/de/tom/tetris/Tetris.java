@@ -1,14 +1,22 @@
 package de.tom.tetris;
 
+import java.applet.AudioClip;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Image;
+import java.io.File;
 import java.io.IOException;
 import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import javax.imageio.ImageIO;
+import javax.sound.sampled.AudioInputStream;
+import javax.sound.sampled.AudioSystem;
+import javax.sound.sampled.Clip;
+import javax.sound.sampled.DataLine;
+import javax.sound.sampled.LineUnavailableException;
+import javax.sound.sampled.UnsupportedAudioFileException;
 import javax.swing.JFrame;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
@@ -17,6 +25,7 @@ import javax.swing.JSeparator;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
 
+import de.tom.tetris.api.SoundAPI;
 import de.tom.tetris.constants.GameKeys;
 import de.tom.tetris.handler.NewKeyHandler;
 import de.tom.tetris.objects.Block;
@@ -50,6 +59,12 @@ public class Tetris extends Thread{
 	
 	NewKeyHandler newKeyHandler;
 	
+	public File tetrisSongFile, fallSoundFile, lineSoundFile;
+	
+	public Clip tetrisClip;
+	
+	float volume = 25.0f;
+	
 	
 	
 	
@@ -60,11 +75,30 @@ public class Tetris extends Thread{
 	
 	// constructor
 	public Tetris() {
+		tetrisSongFile = new File(Tetris.class.getResource("/sound/tetris.wav").getPath());
+		fallSoundFile = new File(Tetris.class.getResource("/sound/fall.wav").getPath());
+		lineSoundFile = new File(Tetris.class.getResource("/sound/line.wav").getPath());
+		AudioInputStream sound;
+		
+		
+		
 		keyCooldown = new long[GameKeys.MAX_KEYS];
 		setupJFrame();
 		died = false;
 		paused = false;
 		this.start();
+		try {
+			sound = AudioSystem.getAudioInputStream(tetrisSongFile);
+			DataLine.Info info = new DataLine.Info(Clip.class, sound.getFormat());
+			tetrisClip = (Clip) AudioSystem.getLine(info);
+			tetrisClip.open(sound);
+			SoundAPI.setVolume(tetrisClip, 0.25f);
+			tetrisClip.loop(Clip.LOOP_CONTINUOUSLY);
+			tetrisClip.start();
+		} catch (UnsupportedAudioFileException | IOException | LineUnavailableException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		
 	}
 	
@@ -234,7 +268,7 @@ public class Tetris extends Thread{
 			
 			addBlock(currentBlock);
 			createNextBlock();
-			
+			new SoundAPI().playSound(fallSoundFile, 25);
 			return;
 		}
 		if(!newKeyHandler.isKeyDown(GameKeys.D_KEY)) currentBlock.setLocation(currentBlock.getX(), currentBlock.getY()+1);
@@ -277,6 +311,7 @@ public class Tetris extends Thread{
 			
 			
 		}
+		new SoundAPI().playSound(lineSoundFile, 25);
 		
 		
 	}
