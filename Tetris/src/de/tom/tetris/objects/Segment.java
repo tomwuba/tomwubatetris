@@ -35,7 +35,6 @@ public class Segment {
 		int height = (int) ((float) 600*((float)tetris.getFrame().getContentPane().getWidth()/(float)500));
 		if(height > tetris.getFrame().getContentPane().getHeight()) height = tetris.getFrame().getContentPane().getHeight();
 		g.drawImage(tetris.getSegmentImages()[segmentType], Math.round((x*tetris.getScale())+tetris.getFrame().getContentPane().getWidth()/2-(width/2)), Math.round(y*tetris.getScale()+tetris.getFrame().getContentPane().getHeight()/2-(height/2)), Math.round(tetris.getScale()), Math.round(tetris.getScale()), null);
-		//g.fillRect((x*Math.round(tetris.getScale()))+tetris.getFrame().getContentPane().getWidth()/2-(width/2), (y*Math.round(tetris.getScale()))+tetris.getFrame().getContentPane().getHeight()/2-(height/2), Math.round(tetris.getScale()), Math.round(tetris.getScale()));
 	}
 	
 	

@@ -2,14 +2,11 @@ package de.tom.tetris.window;
 
 import java.awt.Color;
 import java.awt.Graphics;
-import java.awt.Toolkit;
-import java.util.ArrayList;
 import java.util.Iterator;
 
 import javax.swing.JPanel;
 
 import de.tom.tetris.Tetris;
-import de.tom.tetris.handler.KeyHandler;
 import de.tom.tetris.objects.Block;
 
 @SuppressWarnings("serial")

@@ -3,18 +3,12 @@ package de.tom.tetris;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Image;
-import java.awt.Toolkit;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.UnsupportedEncodingException;
-import java.net.URLDecoder;
-import java.util.ArrayList;
+import java.io.IOException;
 import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import javax.imageio.ImageIO;
-import javax.swing.ImageIcon;
 import javax.swing.JFrame;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
@@ -23,8 +17,7 @@ import javax.swing.JSeparator;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
 
-import de.tom.tetris.handler.GameKeys;
-import de.tom.tetris.handler.KeyHandler;
+import de.tom.tetris.constants.GameKeys;
 import de.tom.tetris.handler.NewKeyHandler;
 import de.tom.tetris.objects.Block;
 import de.tom.tetris.objects.Segment;
@@ -48,7 +41,6 @@ public class Tetris extends Thread{
 	
 	boolean died, paused;
 	
-	KeyHandler keyHandler;
 	
 	Image segmentImages[] = new Image[7];
 	
@@ -80,27 +72,35 @@ public class Tetris extends Thread{
 	
 	
 	void setupJFrame() {
+		pathToData = Tetris.class.getResource("/texture/").getPath();
+		
+		
 		try {
-			pathToData = new File(URLDecoder.decode(Tetris.class.getProtectionDomain().getCodeSource().getLocation().getPath() + "/..", "UTF-8")).getParentFile().getParentFile().getAbsolutePath();
-		} catch (UnsupportedEncodingException e) {
+			backgroundImage = ImageIO.read(Tetris.class.getResource("/texture/background.png"));
+		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		
-		backgroundImage = Toolkit.getDefaultToolkit().getImage(pathToData + "/texture/background.png");
-		jframe = new JFrame("Tetris");
+		jframe = new JFrame("Tetris (beta)");
 		setupJMenuBar();
-		jframe.setIconImage(new ImageIcon("/texture/tetris.png").getImage());
+		try {
+			jframe.setIconImage(ImageIO.read(Tetris.class.getResource("/texture/tetris.png")));
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 		nextBlock = new Block(this, 19, 5);
 		currentBlock = new Block(this, 7, 1);
 		// Set Images:
 		for(int i = 0; i < 7; i++) {
-			segmentImages[i] = Toolkit.getDefaultToolkit().getImage(getPathToData() + "/texture/segments" + segmentPack + "/segment_" + i + ".png");
+			try {
+				segmentImages[i] = ImageIO.read(Tetris.class.getResource("/texture/segments" + segmentPack + "/segment_" + i + ".png"));
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
 		}
 		
 		
 		WindowPane windowPane = new WindowPane(this);
 		windowPane.setPreferredSize(new Dimension(500, 600));
-		//keyHandler = new KeyHandler(this);
 		newKeyHandler = new NewKeyHandler();
 		jframe.addKeyListener(newKeyHandler);
 		jframe.getContentPane().add(windowPane);

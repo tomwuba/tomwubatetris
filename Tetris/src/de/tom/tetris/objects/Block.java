@@ -17,7 +17,7 @@ public class Block {
 	int middleX, middleY, blockType, rotation;
 	boolean existing;
 	
-	ArrayList<Segment> segments; // TODO: Array!!!!!!!!!!!!!!!!!!!!!!-----------------------------------------------
+	ArrayList<Segment> segments; 
 	
 	boolean isRotating = false;
 	
@@ -37,7 +37,6 @@ public class Block {
 	// methods:
 	
 	public void draw(Graphics g) {
-		// TODO: draw all segments.
 		
 		if(segments.isEmpty()) {
 			remove();
@@ -56,7 +55,6 @@ public class Block {
 	}
 	
 	public void rotate(int direction) {
-		//System.out.println(System.currentTimeMillis() + "test");
 		ArrayList<Segment> newSegments = new ArrayList<>();
 		if(blockType != BlockType.BLOCK_7 && blockType != BlockType.BLOCK_1) {
 			for(Segment oldSegment : segments) {
@@ -157,7 +155,6 @@ public class Block {
 			}
 
 		}
-		// TODO: Set segments relative to blockType
 	}
 	
 	
@@ -231,7 +228,6 @@ public class Block {
 	}
 	
 	public void move(int directionX) {
-		// TODO: check if outside border || overlapping with other segments!
 		middleX = middleX + directionX;
 		ArrayList<Segment> newSegments = new ArrayList<>();
 		for(Segment segment : segments) {
@@ -240,8 +236,6 @@ public class Block {
 			newSegments.add(segment);
 			
 		}
-		//if(!isOutSideOfMap(newSegments) && !isBlockOverlapping(newSegments)) segments = newSegments; 
-		// TODO: check!
 		
 	}
 	

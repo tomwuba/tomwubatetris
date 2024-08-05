@@ -1,4 +1,4 @@
-package de.tom.tetris.handler;
+package de.tom.tetris.constants;
 
 public abstract class GameKeys {
 	
